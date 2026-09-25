@@ -5,7 +5,8 @@
  * Kotlin/Native cinterop cannot reliably bind to variadic C functions (opus_encoder_ctl) or to
  * function-like macros (OPUS_SET_BITRATE/OPUS_GET_LOOKAHEAD), so this header provides tiny,
  * non-variadic wrapper functions that cinterop *can* bind to. Included by the generated opus.def
- * (see kopus/build.gradle.kts's generateOpusDef task) alongside opus.h.
+ * (see kopus/build.gradle.kts's generateOpusDef task) alongside opus.h. Kept outside the vendored
+ * opus/ tree so updating libopus can't drop it.
  */
 
 #include "opus.h"

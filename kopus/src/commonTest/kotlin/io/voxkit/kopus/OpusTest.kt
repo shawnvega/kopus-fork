@@ -123,6 +123,40 @@ class OpusTest {
         }
     }
 
+    @Test
+    fun testSetBitrateAcceptsSpecialValues() {
+        Opus.encoder(
+            SampleRate.RATE_48K,
+            channels = Channels.STEREO,
+            application = OpusApplication.AUDIO,
+        ).use { encoder ->
+            encoder.setBitrate(OpusEncoder.BITRATE_MAX)
+            encoder.setBitrate(OpusEncoder.BITRATE_AUTO)
+        }
+    }
+
+    @Test
+    fun testSetBitrateAfterCloseThrows() {
+        val encoder = Opus.encoder(
+            SampleRate.RATE_48K,
+            channels = Channels.STEREO,
+            application = OpusApplication.AUDIO,
+        )
+        encoder.close()
+        assertFailsWith<IllegalStateException> { encoder.setBitrate(24_000) }
+    }
+
+    @Test
+    fun testGetLookaheadAfterCloseThrows() {
+        val encoder = Opus.encoder(
+            SampleRate.RATE_48K,
+            channels = Channels.STEREO,
+            application = OpusApplication.AUDIO,
+        )
+        encoder.close()
+        assertFailsWith<IllegalStateException> { encoder.getLookahead() }
+    }
+
     private fun encodeTotalBytes(
         sampleRate: SampleRate,
         channels: Channels,

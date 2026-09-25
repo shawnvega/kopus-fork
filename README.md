@@ -106,14 +106,18 @@ val recoveredSamples = decoder.decode(
 ```kotlin
 // Set the target bitrate (bits per second) for subsequent encoding calls
 encoder.setBitrate(24_000)
+
+// Or hand the choice back to the encoder
+encoder.setBitrate(OpusEncoder.BITRATE_AUTO)
 ```
 
 ### Lookahead (for Ogg Opus container writers)
 
 ```kotlin
-// Number of samples of algorithmic delay the encoder adds; record this as the
-// pre-skip value in an Ogg Opus stream's OpusHead header
-val preSkip = encoder.getLookahead()
+// Samples of algorithmic delay the encoder adds, at the encoder's sample rate.
+// An OpusHead pre-skip is always counted at 48 kHz, so scale it for lower rates,
+// e.g. for an encoder created with SampleRate.RATE_16K:
+val preSkip = encoder.getLookahead() * 48_000 / 16_000
 ```
 
 ## Platform Support

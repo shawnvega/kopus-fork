@@ -33,26 +33,29 @@ public interface OpusEncoder : AutoCloseable {
     /**
      * Sets the target bitrate, in bits per second, for subsequent encoding calls.
      *
-     * Values from 500 to 512000 are meaningful, as well as the special values `OPUS_AUTO`
-     * (-1000; let the encoder pick a bitrate based on the sample rate and channel count, the
-     * default) and `OPUS_BITRATE_MAX` (-1; use as much rate as available, useful when the rate is
-     * instead controlled by the output buffer size). Any other value less than or equal to 0 is
-     * rejected. Values from 1 to 500 are clamped up to 500, and values above 300000 times the
-     * number of channels are clamped down to that maximum; see
+     * Accepts a bitrate from 500 up to 300000 times the number of channels, or one of the special
+     * values [BITRATE_AUTO] (the default) and [BITRATE_MAX]. Values from 1 to 499 are clamped up
+     * to 500, values above 300000 times the number of channels are clamped down to that maximum,
+     * and any other value less than or equal to 0 is rejected; see
      * https://opus-codec.org/docs/opus_api-1.5/group__opus__encoderctls.html#gaa89264fd93c9da70362a0c9b96b9ca88.
      *
-     * @param bitrate Target bitrate in bits per second, or the special values described above.
+     * @param bitrate Target bitrate in bits per second, or [BITRATE_AUTO]/[BITRATE_MAX].
+     * @throws IllegalArgumentException if libopus rejects [bitrate].
+     * @throws IllegalStateException if the encoder has been closed.
      */
     public fun setBitrate(bitrate: Int)
 
     /**
      * Returns the encoder's algorithmic delay ("lookahead"), in samples at the encoder's
-     * configured sample rate. This is the number of samples of silence that were prepended to
-     * the encoded signal, and is the value that must be recorded as an Ogg Opus stream's
-     * pre-skip so a decoder can time-align its output with the original input; see
+     * configured sample rate; see
      * https://opus-codec.org/docs/opus_api-1.5/group__opus__encoderctls.html#ga48b3e5b2c1fe4ab4caa1b1f0e07ee61f.
      *
-     * @return Number of lookahead samples.
+     * An Ogg Opus stream's pre-skip (RFC 7845, section 5.1) is always counted at 48 kHz, so when
+     * writing one from an encoder configured at a lower sample rate, scale this value by
+     * `48000 / sampleRate` rather than recording it directly.
+     *
+     * @return Number of lookahead samples at the encoder's sample rate.
+     * @throws IllegalStateException if the encoder has been closed.
      */
     public fun getLookahead(): Int
 
@@ -62,6 +65,19 @@ public interface OpusEncoder : AutoCloseable {
          * the Opus documentation: https://opus-codec.org/docs/opus_api-1.5/group__opus__encoder.html.
          */
         public const val DEFAULT_OUTPUT_BUFFER_SIZE: Int = 4000
+
+        /**
+         * [setBitrate] value letting the encoder pick a bitrate from the sample rate and channel
+         * count. This is the encoder's initial setting. Equal to libopus's `OPUS_AUTO`.
+         */
+        public const val BITRATE_AUTO: Int = -1000
+
+        /**
+         * [setBitrate] value telling the encoder to use as much rate as it can, useful when the
+         * rate is instead controlled by the output buffer size. Equal to libopus's
+         * `OPUS_BITRATE_MAX`.
+         */
+        public const val BITRATE_MAX: Int = -1
     }
 }
 
