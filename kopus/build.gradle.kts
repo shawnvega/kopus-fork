@@ -1,6 +1,5 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import java.util.Properties
 
@@ -28,12 +27,6 @@ kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
-        // commonTest needs the JNI library, which only loads on a device, so run it as
-        // instrumented tests instead of host unit tests.
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        unitTestVariant.sourceSetTree.set(KotlinSourceSetTree.unitTest)
     }
     iosX64 { configureOpusInterop() }
     iosArm64 { configureOpusInterop() }
