@@ -115,6 +115,65 @@ Java_io_voxkit_kopus_OpusEncoderImpl_nativeEncodeFloat(
 
 extern "C"
 JNIEXPORT void JNICALL
+Java_io_voxkit_kopus_OpusEncoderImpl_nativeSetBitrate(
+        JNIEnv *env,
+        jobject self,
+        jlong encPtr,
+        jint bitrate
+) {
+    OpusEncoder *enc = reinterpret_cast<OpusEncoder *>(encPtr);
+    if (enc == nullptr) {
+        jclass exceptionClass = env->FindClass("java/lang/IllegalStateException");
+        if (exceptionClass != nullptr) {
+            env->ThrowNew(exceptionClass, "Opus encoder is not initialized.");
+        }
+        return;
+    }
+
+    int result = opus_encoder_ctl(enc, OPUS_SET_BITRATE(bitrate));
+    if (result != OPUS_OK) {
+        jclass exceptionClass = env->FindClass("java/lang/IllegalArgumentException");
+        if (exceptionClass != nullptr) {
+            std::string opusError = opus_strerror(result);
+            std::string errorMessage = "Failed to set Opus encoder bitrate: " + opusError;
+            env->ThrowNew(exceptionClass, errorMessage.c_str());
+        }
+    }
+}
+
+extern "C"
+JNIEXPORT jint JNICALL
+Java_io_voxkit_kopus_OpusEncoderImpl_nativeGetLookahead(
+        JNIEnv *env,
+        jobject self,
+        jlong encPtr
+) {
+    OpusEncoder *enc = reinterpret_cast<OpusEncoder *>(encPtr);
+    if (enc == nullptr) {
+        jclass exceptionClass = env->FindClass("java/lang/IllegalStateException");
+        if (exceptionClass != nullptr) {
+            env->ThrowNew(exceptionClass, "Opus encoder is not initialized.");
+        }
+        return -1;
+    }
+
+    opus_int32 lookahead = 0;
+    int result = opus_encoder_ctl(enc, OPUS_GET_LOOKAHEAD(&lookahead));
+    if (result != OPUS_OK) {
+        jclass exceptionClass = env->FindClass("java/lang/IllegalArgumentException");
+        if (exceptionClass != nullptr) {
+            std::string opusError = opus_strerror(result);
+            std::string errorMessage = "Failed to get Opus encoder lookahead: " + opusError;
+            env->ThrowNew(exceptionClass, errorMessage.c_str());
+        }
+        return -1;
+    }
+
+    return static_cast<jint>(lookahead);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
 Java_io_voxkit_kopus_OpusEncoderImpl_nativeClose(
         JNIEnv *env,
         jobject self,

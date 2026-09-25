@@ -2,6 +2,8 @@ package io.voxkit.kopus
 
 import kotlinx.cinterop.*
 import opus.OPUS_OK
+import opus.kopus_encoder_get_lookahead
+import opus.kopus_encoder_set_bitrate
 import opus.opus_encode
 import opus.opus_encode_float
 import opus.opus_encoder_create
@@ -65,6 +67,27 @@ private class OpusEncoderImpl(
                 )
             }
         }
+    }
+
+    override fun setBitrate(bitrate: Int) {
+        val enc = checkNotNull(encoder) { "Encoder has been closed." }
+        val result = kopus_encoder_set_bitrate(enc, bitrate)
+        require(result == OPUS_OK) {
+            "Failed to set Opus encoder bitrate: ${Opus.getErrorString(result)}"
+        }
+    }
+
+    override fun getLookahead(): Int {
+        val enc = checkNotNull(encoder) { "Encoder has been closed." }
+        val lookahead = memScoped {
+            val value = alloc<IntVar>()
+            val result = kopus_encoder_get_lookahead(enc, value.ptr)
+            require(result == OPUS_OK) {
+                "Failed to get Opus encoder lookahead: ${Opus.getErrorString(result)}"
+            }
+            value.value
+        }
+        return lookahead
     }
 
     override fun close() {

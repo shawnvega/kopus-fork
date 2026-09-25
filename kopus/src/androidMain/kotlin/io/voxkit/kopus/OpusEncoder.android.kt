@@ -44,6 +44,16 @@ private class OpusEncoderImpl(
         return nativeEncodeFloat(nativeEncoderPtr, pcm, frameSize, output)
     }
 
+    override fun setBitrate(bitrate: Int) {
+        check(nativeEncoderPtr != 0L) { "Encoder has been closed." }
+        nativeSetBitrate(nativeEncoderPtr, bitrate)
+    }
+
+    override fun getLookahead(): Int {
+        check(nativeEncoderPtr != 0L) { "Encoder has been closed." }
+        return nativeGetLookahead(nativeEncoderPtr)
+    }
+
     override fun close() {
         check(nativeEncoderPtr != 0L) { "Encoder has already been closed." }
         nativeClose(nativeEncoderPtr)
@@ -69,6 +79,10 @@ private class OpusEncoderImpl(
         frameSize: Int,
         output: ByteArray
     ): Int
+
+    private external fun nativeSetBitrate(nativeEncoderPtr: Long, bitrate: Int)
+
+    private external fun nativeGetLookahead(nativeEncoderPtr: Long): Int
 
     private external fun nativeClose(nativeEncoderPtr: Long)
 }

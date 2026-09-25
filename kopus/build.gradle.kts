@@ -127,7 +127,7 @@ tasks
 
             doLast {
                 val defFileContent = """
-                    headers = opus.h
+                    headers = opus.h kopus_bridge.h
                     staticLibraries = libopus.a
                     libraryPaths = build/opus/$platformName/cmake
                 """.trimIndent()
